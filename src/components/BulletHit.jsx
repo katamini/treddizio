@@ -20,7 +20,7 @@ const AnimatedBox = ({ scale, target, speed }) => {
   return <Instance ref={ref} scale={scale} position={[0, 0, 0]} />;
 };
 
-export const BulletHit = ({ nb = 100, position, onEnded, isHost }) => {
+export const BulletHit = ({ nb = 100, position, onEnded }) => {
   const boxes = useMemo(
     () =>
       Array.from({ length: nb }, () => ({
@@ -36,12 +36,11 @@ export const BulletHit = ({ nb = 100, position, onEnded, isHost }) => {
   );
 
   useEffect(() => {
-    setTimeout(() => {
-      if (isHost) {
-        onEnded();
-      }
+    const timer = setTimeout(() => {
+      onEnded();
     }, 500);
-  }, [isHost, onEnded]);
+    return () => clearTimeout(timer);
+  }, [onEnded]);
 
   return (
     <group position={[position.x, position.y, position.z]}>

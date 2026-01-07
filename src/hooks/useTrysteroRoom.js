@@ -13,8 +13,6 @@ export function useTrysteroRoom() {
   const roomRef = useRef(null);
   const playersRef = useRef(new Map());
   const actionsRef = useRef({});
-  const [isHost, setIsHost] = useState(false);
-  const hostIdRef = useRef(null);
 
   useEffect(() => {
     // Generate local player ID
@@ -29,7 +27,6 @@ export function useTrysteroRoom() {
     const [sendPlayerState, getPlayerState] = room.makeAction('playerState');
     const [sendBullets, getBullets] = room.makeAction('bullets');
     const [sendHits, getHits] = room.makeAction('hits');
-    const [sendHostClaim, getHostClaim] = room.makeAction('hostClaim');
     
     actionsRef.current = {
       sendPlayerState,
@@ -37,31 +34,8 @@ export function useTrysteroRoom() {
       sendBullets,
       getBullets,
       sendHits,
-      getHits,
-      sendHostClaim,
-      getHostClaim
+      getHits
     };
-    
-    // Claim host if first player
-    const claimHost = () => {
-      sendHostClaim(localId);
-      setTimeout(() => {
-        if (!hostIdRef.current || hostIdRef.current === localId) {
-          hostIdRef.current = localId;
-          setIsHost(true);
-        }
-      }, 100);
-    };
-    
-    claimHost();
-    
-    // Listen for host claims
-    getHostClaim((claimedId, peerId) => {
-      if (!hostIdRef.current || peerId < hostIdRef.current) {
-        hostIdRef.current = claimedId;
-        setIsHost(claimedId === localId);
-      }
-    });
     
     // Handle peer join
     room.onPeerJoin((peerId) => {
@@ -102,10 +76,6 @@ export function useTrysteroRoom() {
       console.log('Peer left:', peerId);
       playersRef.current.delete(peerId);
       setPlayers(Array.from(playersRef.current.values()));
-      if (hostIdRef.current === peerId) {
-        // Re-claim host if host left
-        claimHost();
-      }
     });
     
     // Listen for player state updates
@@ -170,7 +140,6 @@ export function useTrysteroRoom() {
   return {
     players,
     myPlayerId,
-    isHost,
     updatePlayerState,
     getPlayer,
     myPlayer,

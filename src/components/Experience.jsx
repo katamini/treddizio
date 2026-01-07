@@ -1,5 +1,5 @@
 import { Environment } from "@react-three/drei";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useTrysteroRoom } from "../hooks/useTrysteroRoom";
 import { useJoystick } from "../hooks/useJoystick";
 import { Bullet } from "./Bullet";
@@ -8,62 +8,82 @@ import { CharacterController } from "./CharacterController";
 import { Map } from "./Map";
 
 export const Experience = ({ downgradedPerformance = false }) => {
-  const { players, myPlayerId, isHost, updatePlayerState, myPlayer, actions } = useTrysteroRoom();
-  const [bullets, setBullets] = useState([]);
-  const [hits, setHits] = useState([]);
+  const { players, myPlayerId, updatePlayerState, myPlayer, actions } = useTrysteroRoom();
+  const [localBullets, setLocalBullets] = useState([]);
+  const [localHits, setLocalHits] = useState([]);
   const [networkBullets, setNetworkBullets] = useState([]);
   const [networkHits, setNetworkHits] = useState([]);
+  const sentBulletIdsRef = useRef(new Set());
   
   // Create joystick for local player
   const joystick = useJoystick();
 
-  // Sync bullets across network (only host sends)
+  // Broadcast our own bullets to all peers (only new ones)
   useEffect(() => {
-    if (actions.sendBullets && isHost && bullets.length > 0) {
-      actions.sendBullets(bullets);
+    if (actions.sendBullets && localBullets.length > 0) {
+      // Only send bullets that belong to us and haven't been sent yet
+      const myBullets = localBullets.filter(b => 
+        b.player === myPlayerId && !sentBulletIdsRef.current.has(b.id)
+      );
+      if (myBullets.length > 0) {
+        myBullets.forEach(b => sentBulletIdsRef.current.add(b.id));
+        actions.sendBullets(myBullets);
+      }
     }
-  }, [bullets, actions, isHost]);
+  }, [localBullets, actions, myPlayerId]);
 
-  // Sync hits across network (only host sends)
+  // Broadcast our own hits to all peers
   useEffect(() => {
-    if (actions.sendHits && isHost && hits.length > 0) {
-      actions.sendHits(hits);
+    if (actions.sendHits && localHits.length > 0) {
+      actions.sendHits(localHits);
     }
-  }, [hits, actions, isHost]);
+  }, [localHits, actions]);
 
-  // Listen for network bullets
+  // Listen for bullets from all peers
   useEffect(() => {
     if (actions.getBullets) {
-      actions.getBullets((data) => {
-        if (!isHost) {
-          setNetworkBullets(data);
+      actions.getBullets((bullets, peerId) => {
+        // Only add bullets from other players (not our own)
+        const otherPlayerBullets = bullets.filter(b => b.player !== myPlayerId);
+        if (otherPlayerBullets.length > 0) {
+          setNetworkBullets(prev => {
+            // Merge with existing, avoiding duplicates
+            const existingIds = new Set(prev.map(b => b.id));
+            const newBullets = otherPlayerBullets.filter(b => !existingIds.has(b.id));
+            return [...prev, ...newBullets];
+          });
         }
       });
     }
-  }, [actions, isHost]);
+  }, [actions, myPlayerId]);
 
-  // Listen for network hits
+  // Listen for hits from all peers
   useEffect(() => {
     if (actions.getHits) {
-      actions.getHits((data) => {
-        if (!isHost) {
-          setNetworkHits(data);
-        }
+      actions.getHits((hits) => {
+        setNetworkHits(prev => {
+          // Merge with existing, avoiding duplicates
+          const existingIds = new Set(prev.map(h => h.id));
+          const newHits = hits.filter(h => !existingIds.has(h.id));
+          return [...prev, ...newHits];
+        });
       });
     }
-  }, [actions, isHost]);
+  }, [actions]);
 
   const onFire = (bullet) => {
-    setBullets((bullets) => [...bullets, bullet]);
+    setLocalBullets((bullets) => [...bullets, bullet]);
   };
 
   const onHit = (bulletId, position) => {
-    setBullets((bullets) => bullets.filter((bullet) => bullet.id !== bulletId));
-    setHits((hits) => [...hits, { id: bulletId, position }]);
+    setLocalBullets((bullets) => bullets.filter((bullet) => bullet.id !== bulletId));
+    setNetworkBullets((bullets) => bullets.filter((bullet) => bullet.id !== bulletId));
+    setLocalHits((hits) => [...hits, { id: bulletId, position }]);
   };
 
   const onHitEnded = (hitId) => {
-    setHits((hits) => hits.filter((h) => h.id !== hitId));
+    setLocalHits((hits) => hits.filter((h) => h.id !== hitId));
+    setNetworkHits((hits) => hits.filter((h) => h.id !== hitId));
   };
 
   const onKilled = (victim, killer) => {
@@ -87,20 +107,18 @@ export const Experience = ({ downgradedPerformance = false }) => {
           onKilled={onKilled}
           onFire={onFire}
           downgradedPerformance={downgradedPerformance}
-          isHost={isHost}
           updatePlayerState={updatePlayerState}
         />
       ))}
-      {(isHost ? bullets : networkBullets).map((bullet) => (
+      {[...localBullets, ...networkBullets].map((bullet) => (
         <Bullet
           key={bullet.id}
           {...bullet}
           onHit={(position) => onHit(bullet.id, position)}
-          isHost={isHost}
         />
       ))}
-      {(isHost ? hits : networkHits).map((hit) => (
-        <BulletHit key={hit.id} {...hit} onEnded={() => onHitEnded(hit.id)} isHost={isHost} />
+      {[...localHits, ...networkHits].map((hit) => (
+        <BulletHit key={hit.id} {...hit} onEnded={() => onHitEnded(hit.id)} />
       ))}
       <Environment preset="sunset" />
     </>

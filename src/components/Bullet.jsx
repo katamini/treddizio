@@ -12,7 +12,7 @@ const bulletMaterial = new MeshBasicMaterial({
 
 bulletMaterial.color.multiplyScalar(42);
 
-export const Bullet = ({ player, angle, position, onHit, isHost }) => {
+export const Bullet = ({ player, angle, position, onHit }) => {
   const rigidbody = useRef();
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export const Bullet = ({ player, angle, position, onHit, isHost }) => {
           ref={rigidbody}
           gravityScale={0}
           onIntersectionEnter={(e) => {
-            if (isHost && e.other.rigidBody.userData?.type !== "bullet") {
+            if (e.other.rigidBody.userData?.type !== "bullet") {
               rigidbody.current.setEnabled(false);
               onHit(vec3(rigidbody.current.translation()));
             }

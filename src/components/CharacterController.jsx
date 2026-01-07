@@ -18,7 +18,6 @@ export const CharacterController = ({
   onKilled,
   onFire,
   downgradedPerformance,
-  isHost,
   updatePlayerState,
   ...props
 }) => {
@@ -125,7 +124,7 @@ export const CharacterController = ({
         z: Math.cos(angle) * MOVEMENT_SPEED * delta,
       };
 
-      // All user players apply physics locally for responsiveness
+      // All players apply physics locally
       if (rigidbody.current && rigidbody.current.applyImpulse) {
         rigidbody.current.applyImpulse(impulse, true);
       }
@@ -150,7 +149,7 @@ export const CharacterController = ({
       setAnimation(
         isMoving && currentAngle !== null ? "Run_Shoot" : "Idle_Shoot"
       );
-      // All players can fire, but only host processes physics
+      // All players can fire
       if (rigidbody.current && rigidbody.current.translation) {
         if (Date.now() - lastShoot.current > FIRE_RATE) {
           lastShoot.current = Date.now();
@@ -217,8 +216,9 @@ export const CharacterController = ({
         type={userPlayer ? "dynamic" : "kinematicPosition"}
         onIntersectionEnter={({ other }) => {
           if (
-            isHost &&
+            userPlayer &&
             other.rigidBody.userData.type === "bullet" &&
+            other.rigidBody.userData.player !== player.id &&
             player.state.health > 0
           ) {
             const newHealth =
