@@ -48,7 +48,8 @@ export const CharacterController = ({
   };
 
   useEffect(() => {
-    if (isHost && userPlayer && rigidbody.current) {
+    if (userPlayer && rigidbody.current) {
+      // Local player: spawn randomly
       spawnRandomly();
     } else if (!userPlayer && rigidbody.current) {
       // Remote player: set initial position if available
@@ -57,10 +58,10 @@ export const CharacterController = ({
         rigidbody.current.setTranslation({ x: pos[0], y: pos[1], z: pos[2] });
       } else if (!pos) {
         // No position yet, spawn at origin
-        rigidbody.current.setTranslation({ x: 0, y: 1, z: 0 });
+        rigidbody.current.setTranslation({ x: 0, y: 1.28, z: 0 });
       }
     }
-  }, [isHost, userPlayer, player.state.pos]);
+  }, [userPlayer, player.state.pos]);
 
   useEffect(() => {
     if (player.state.dead) {
@@ -124,7 +125,8 @@ export const CharacterController = ({
         z: Math.cos(angle) * MOVEMENT_SPEED * delta,
       };
 
-      if (isHost && rigidbody.current.applyImpulse) {
+      // All user players apply physics locally for responsiveness
+      if (rigidbody.current && rigidbody.current.applyImpulse) {
         rigidbody.current.applyImpulse(impulse, true);
       }
     } else {
@@ -148,7 +150,8 @@ export const CharacterController = ({
       setAnimation(
         isMoving && currentAngle !== null ? "Run_Shoot" : "Idle_Shoot"
       );
-      if (isHost && rigidbody.current.translation) {
+      // All players can fire, but only host processes physics
+      if (rigidbody.current && rigidbody.current.translation) {
         if (Date.now() - lastShoot.current > FIRE_RATE) {
           lastShoot.current = Date.now();
           const translation = rigidbody.current.translation();
@@ -165,15 +168,16 @@ export const CharacterController = ({
       }
     }
 
-    // Sync position: host sends, non-host receives
-    if (isHost && userPlayer && rigidbody.current && rigidbody.current.translation) {
+    // Sync position: local player sends, remote players receive
+    if (userPlayer && rigidbody.current && rigidbody.current.translation) {
+      // Local player: send position to network
       const translation = rigidbody.current.translation();
       if (translation) {
         // Convert Vector3 to array for network sync
         const posArray = [translation.x, translation.y, translation.z];
         updatePlayerState(player.id, { 
           pos: posArray,
-          rotation: character.current ? character.current.rotation.y : 0
+          rotation: character.current ? character.current.rotation.y : lastRotationY.current
         });
       }
     } else if (!userPlayer && rigidbody.current && rigidbody.current.setTranslation) {
@@ -210,7 +214,7 @@ export const CharacterController = ({
         colliders={false}
         linearDamping={12}
         lockRotations
-        type={userPlayer && isHost ? "dynamic" : "kinematicPosition"}
+        type={userPlayer ? "dynamic" : "kinematicPosition"}
         onIntersectionEnter={({ other }) => {
           if (
             isHost &&
