@@ -7,6 +7,7 @@ export function useJoystick() {
   const containerRef = useRef(null);
   const joystickRef = useRef(null);
   const isActiveRef = useRef(false);
+  const keysRef = useRef({});
 
   useEffect(() => {
     // Create joystick UI
@@ -142,6 +143,65 @@ export function useJoystick() {
     fireButton.addEventListener('mouseup', onFireEnd);
     fireButton.addEventListener('touchend', onFireEnd);
     
+    // Keyboard controls
+    const onKeyDown = (e) => {
+      keysRef.current[e.code] = true;
+      
+      // Calculate movement angle from arrow keys
+      let x = 0, z = 0;
+      if (keysRef.current['ArrowUp'] || keysRef.current['KeyW']) z -= 1;
+      if (keysRef.current['ArrowDown'] || keysRef.current['KeyS']) z += 1;
+      if (keysRef.current['ArrowLeft'] || keysRef.current['KeyA']) x -= 1;
+      if (keysRef.current['ArrowRight'] || keysRef.current['KeyD']) x += 1;
+      
+      if (x !== 0 || z !== 0) {
+        const newAngle = Math.atan2(x, z);
+        setAngle(newAngle);
+        setIsPressed(true);
+      }
+      
+      // Spacebar for fire
+      if (e.code === 'Space') {
+        e.preventDefault();
+        setButtons(prev => ({ ...prev, fire: true }));
+      }
+    };
+    
+    const onKeyUp = (e) => {
+      keysRef.current[e.code] = false;
+      
+      // Check if any movement keys are still pressed
+      const hasMovement = 
+        keysRef.current['ArrowUp'] || keysRef.current['KeyW'] ||
+        keysRef.current['ArrowDown'] || keysRef.current['KeyS'] ||
+        keysRef.current['ArrowLeft'] || keysRef.current['KeyA'] ||
+        keysRef.current['ArrowRight'] || keysRef.current['KeyD'];
+      
+      if (!hasMovement) {
+        setAngle(null);
+        setIsPressed(false);
+      } else {
+        // Recalculate angle
+        let x = 0, z = 0;
+        if (keysRef.current['ArrowUp'] || keysRef.current['KeyW']) z -= 1;
+        if (keysRef.current['ArrowDown'] || keysRef.current['KeyS']) z += 1;
+        if (keysRef.current['ArrowLeft'] || keysRef.current['KeyA']) x -= 1;
+        if (keysRef.current['ArrowRight'] || keysRef.current['KeyD']) x += 1;
+        if (x !== 0 || z !== 0) {
+          setAngle(Math.atan2(x, z));
+        }
+      }
+      
+      // Spacebar release
+      if (e.code === 'Space') {
+        e.preventDefault();
+        setButtons(prev => ({ ...prev, fire: false }));
+      }
+    };
+    
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('keyup', onKeyUp);
+    
     return () => {
       container.remove();
       fireButton.remove();
@@ -149,6 +209,8 @@ export function useJoystick() {
       document.removeEventListener('touchmove', onMove);
       document.removeEventListener('mouseup', onEnd);
       document.removeEventListener('touchend', onEnd);
+      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('keyup', onKeyUp);
     };
   }, []);
   

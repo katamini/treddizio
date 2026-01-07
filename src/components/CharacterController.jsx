@@ -69,6 +69,9 @@ export const CharacterController = ({
   }, [player.state.health]);
 
   useFrame((_, delta) => {
+    // Safety check: ensure rigidbody is initialized
+    if (!rigidbody.current) return;
+
     // CAMERA FOLLOW
     if (controls.current && userPlayer) {
       const cameraDistanceY = window.innerWidth < 1024 ? 16 : 20;
@@ -90,11 +93,15 @@ export const CharacterController = ({
       return;
     }
 
-    // Update player position based on joystick state
+    // Update player position based on joystick/keyboard state
     const angle = joystick.angle();
-    if (userPlayer && joystick.isJoystickPressed() && angle !== null) {
+    const isMoving = joystick.isJoystickPressed() && angle !== null;
+    
+    if (userPlayer && isMoving) {
       setAnimation("Run");
-      character.current.rotation.y = angle;
+      if (character.current) {
+        character.current.rotation.y = angle;
+      }
 
       // move character in its own direction
       const impulse = {
@@ -103,7 +110,7 @@ export const CharacterController = ({
         z: Math.cos(angle) * MOVEMENT_SPEED * delta,
       };
 
-      if (isHost) {
+      if (isHost && rigidbody.current) {
         rigidbody.current.applyImpulse(impulse, true);
       }
     } else {
@@ -113,17 +120,17 @@ export const CharacterController = ({
     // Check if fire button is pressed
     if (userPlayer && joystick.isPressed("fire")) {
       // fire
-      const angle = joystick.angle();
+      const currentAngle = joystick.angle();
       setAnimation(
-        joystick.isJoystickPressed() && angle !== null ? "Run_Shoot" : "Idle_Shoot"
+        isMoving && currentAngle !== null ? "Run_Shoot" : "Idle_Shoot"
       );
-      if (isHost) {
+      if (isHost && rigidbody.current) {
         if (Date.now() - lastShoot.current > FIRE_RATE) {
           lastShoot.current = Date.now();
           const newBullet = {
             id: player.id + "-" + +new Date(),
             position: vec3(rigidbody.current.translation()),
-            angle: angle || 0,
+            angle: currentAngle || 0,
             player: player.id,
           };
           onFire(newBullet);
@@ -131,10 +138,10 @@ export const CharacterController = ({
       }
     }
 
-    if (isHost && userPlayer) {
+    if (isHost && userPlayer && rigidbody.current) {
       const pos = rigidbody.current.translation();
       updatePlayerState(player.id, { pos });
-    } else if (!isHost && !userPlayer) {
+    } else if (!isHost && !userPlayer && rigidbody.current) {
       const pos = player.state.pos;
       if (pos) {
         rigidbody.current.setTranslation(pos);
