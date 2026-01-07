@@ -40,7 +40,7 @@ export const CharacterController = ({
         break;
       }
     }
-    if (spawns.length > 0) {
+    if (spawns.length > 0 && rigidbody.current && rigidbody.current.setTranslation) {
       const spawnPos = spawns[Math.floor(Math.random() * spawns.length)].position;
       rigidbody.current.setTranslation(spawnPos);
     }
@@ -70,22 +70,25 @@ export const CharacterController = ({
 
   useFrame((_, delta) => {
     // Safety check: ensure rigidbody is initialized
-    if (!rigidbody.current) return;
+    if (!rigidbody.current || !rigidbody.current.translation) return;
 
     // CAMERA FOLLOW
-    if (controls.current && userPlayer) {
+    if (controls.current && userPlayer && rigidbody.current) {
       const cameraDistanceY = window.innerWidth < 1024 ? 16 : 20;
       const cameraDistanceZ = window.innerWidth < 1024 ? 12 : 16;
-      const playerWorldPos = vec3(rigidbody.current.translation());
-      controls.current.setLookAt(
-        playerWorldPos.x,
-        playerWorldPos.y + (player.state.dead ? 12 : cameraDistanceY),
-        playerWorldPos.z + (player.state.dead ? 2 : cameraDistanceZ),
-        playerWorldPos.x,
-        playerWorldPos.y + 1.5,
-        playerWorldPos.z,
-        true
-      );
+      const translation = rigidbody.current.translation();
+      if (translation) {
+        const playerWorldPos = vec3(translation);
+        controls.current.setLookAt(
+          playerWorldPos.x,
+          playerWorldPos.y + (player.state.dead ? 12 : cameraDistanceY),
+          playerWorldPos.z + (player.state.dead ? 2 : cameraDistanceZ),
+          playerWorldPos.x,
+          playerWorldPos.y + 1.5,
+          playerWorldPos.z,
+          true
+        );
+      }
     }
 
     if (player.state.dead) {
@@ -97,7 +100,7 @@ export const CharacterController = ({
     const angle = joystick.angle();
     const isMoving = joystick.isJoystickPressed() && angle !== null;
     
-    if (userPlayer && isMoving) {
+    if (userPlayer && isMoving && rigidbody.current) {
       setAnimation("Run");
       if (character.current) {
         character.current.rotation.y = angle;
@@ -110,7 +113,7 @@ export const CharacterController = ({
         z: Math.cos(angle) * MOVEMENT_SPEED * delta,
       };
 
-      if (isHost && rigidbody.current) {
+      if (isHost && rigidbody.current.applyImpulse) {
         rigidbody.current.applyImpulse(impulse, true);
       }
     } else {
@@ -118,30 +121,35 @@ export const CharacterController = ({
     }
 
     // Check if fire button is pressed
-    if (userPlayer && joystick.isPressed("fire")) {
+    if (userPlayer && joystick.isPressed("fire") && rigidbody.current) {
       // fire
       const currentAngle = joystick.angle();
       setAnimation(
         isMoving && currentAngle !== null ? "Run_Shoot" : "Idle_Shoot"
       );
-      if (isHost && rigidbody.current) {
+      if (isHost && rigidbody.current.translation) {
         if (Date.now() - lastShoot.current > FIRE_RATE) {
           lastShoot.current = Date.now();
-          const newBullet = {
-            id: player.id + "-" + +new Date(),
-            position: vec3(rigidbody.current.translation()),
-            angle: currentAngle || 0,
-            player: player.id,
-          };
-          onFire(newBullet);
+          const translation = rigidbody.current.translation();
+          if (translation) {
+            const newBullet = {
+              id: player.id + "-" + +new Date(),
+              position: vec3(translation),
+              angle: currentAngle || 0,
+              player: player.id,
+            };
+            onFire(newBullet);
+          }
         }
       }
     }
 
-    if (isHost && userPlayer && rigidbody.current) {
-      const pos = rigidbody.current.translation();
-      updatePlayerState(player.id, { pos });
-    } else if (!isHost && !userPlayer && rigidbody.current) {
+    if (isHost && userPlayer && rigidbody.current && rigidbody.current.translation) {
+      const translation = rigidbody.current.translation();
+      if (translation) {
+        updatePlayerState(player.id, { pos: translation });
+      }
+    } else if (!isHost && !userPlayer && rigidbody.current && rigidbody.current.setTranslation) {
       const pos = player.state.pos;
       if (pos) {
         rigidbody.current.setTranslation(pos);
