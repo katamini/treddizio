@@ -1,5 +1,4 @@
 import { RigidBody, vec3 } from "@react-three/rapier";
-import { isHost } from "playroomkit";
 import { useEffect, useRef } from "react";
 import { MeshBasicMaterial } from "three";
 import { WEAPON_OFFSET } from "./CharacterController";
@@ -13,7 +12,7 @@ const bulletMaterial = new MeshBasicMaterial({
 
 bulletMaterial.color.multiplyScalar(42);
 
-export const Bullet = ({ player, angle, position, onHit }) => {
+export const Bullet = ({ player, angle, position, onHit, isHost }) => {
   const rigidbody = useRef();
 
   useEffect(() => {
@@ -39,7 +38,7 @@ export const Bullet = ({ player, angle, position, onHit }) => {
           ref={rigidbody}
           gravityScale={0}
           onIntersectionEnter={(e) => {
-            if (isHost() && e.other.rigidBody.userData?.type !== "bullet") {
+            if (isHost && e.other.rigidBody.userData?.type !== "bullet") {
               rigidbody.current.setEnabled(false);
               onHit(vec3(rigidbody.current.translation()));
             }

@@ -1,55 +1,59 @@
 import { Environment } from "@react-three/drei";
-import {
-  Joystick,
-  insertCoin,
-  isHost,
-  myPlayer,
-  onPlayerJoin,
-  useMultiplayerState,
-} from "playroomkit";
 import { useEffect, useState } from "react";
+import { useTrysteroRoom } from "../hooks/useTrysteroRoom";
+import { useJoystick } from "../hooks/useJoystick";
 import { Bullet } from "./Bullet";
 import { BulletHit } from "./BulletHit";
 import { CharacterController } from "./CharacterController";
 import { Map } from "./Map";
 
 export const Experience = ({ downgradedPerformance = false }) => {
-  const [players, setPlayers] = useState([]);
-  const start = async () => {
-    // Start the game
-    await insertCoin();
-
-    // Create a joystick controller for each joining player
-    onPlayerJoin((state) => {
-      // Joystick will only create UI for current player (myPlayer)
-      // For others, it will only sync their state
-      const joystick = new Joystick(state, {
-        type: "angular",
-        buttons: [{ id: "fire", label: "Fire" }],
-      });
-      const newPlayer = { state, joystick };
-      state.setState("health", 100);
-      state.setState("deaths", 0);
-      state.setState("kills", 0);
-      setPlayers((players) => [...players, newPlayer]);
-      state.onQuit(() => {
-        setPlayers((players) => players.filter((p) => p.state.id !== state.id));
-      });
-    });
-  };
-
-  useEffect(() => {
-    start();
-  }, []);
-
+  const { players, myPlayerId, isHost, updatePlayerState, myPlayer, actions } = useTrysteroRoom();
   const [bullets, setBullets] = useState([]);
   const [hits, setHits] = useState([]);
+  const [networkBullets, setNetworkBullets] = useState([]);
+  const [networkHits, setNetworkHits] = useState([]);
+  
+  // Create joystick for local player
+  const joystick = useJoystick();
 
-  const [networkBullets, setNetworkBullets] = useMultiplayerState(
-    "bullets",
-    []
-  );
-  const [networkHits, setNetworkHits] = useMultiplayerState("hits", []);
+  // Sync bullets across network
+  useEffect(() => {
+    if (actions.sendBullets && bullets.length > 0) {
+      actions.sendBullets(bullets);
+    }
+  }, [bullets, actions]);
+
+  // Sync hits across network
+  useEffect(() => {
+    if (actions.sendHits && hits.length > 0) {
+      actions.sendHits(hits);
+    }
+  }, [hits, actions]);
+
+  // Listen for network bullets
+  useEffect(() => {
+    if (actions.getBullets) {
+      const cleanup = actions.getBullets((data) => {
+        if (!isHost) {
+          setNetworkBullets(data);
+        }
+      });
+      return cleanup;
+    }
+  }, [actions, isHost]);
+
+  // Listen for network hits
+  useEffect(() => {
+    if (actions.getHits) {
+      const cleanup = actions.getHits((data) => {
+        if (!isHost) {
+          setNetworkHits(data);
+        }
+      });
+      return cleanup;
+    }
+  }, [actions, isHost]);
 
   const onFire = (bullet) => {
     setBullets((bullets) => [...bullets, bullet]);
@@ -64,42 +68,41 @@ export const Experience = ({ downgradedPerformance = false }) => {
     setHits((hits) => hits.filter((h) => h.id !== hitId));
   };
 
-  useEffect(() => {
-    setNetworkBullets(bullets);
-  }, [bullets]);
-
-  useEffect(() => {
-    setNetworkHits(hits);
-  }, [hits]);
-
-  const onKilled = (_victim, killer) => {
-    const killerState = players.find((p) => p.state.id === killer).state;
-    killerState.setState("kills", killerState.state.kills + 1);
+  const onKilled = (victim, killer) => {
+    const killerPlayer = players.find((p) => p.id === killer);
+    if (killerPlayer) {
+      updatePlayerState(killer, {
+        kills: (killerPlayer.state.kills || 0) + 1
+      });
+    }
   };
 
   return (
     <>
       <Map />
-      {players.map(({ state, joystick }, index) => (
+      {players.map((player) => (
         <CharacterController
-          key={state.id}
-          state={state}
-          userPlayer={state.id === myPlayer()?.id}
+          key={player.id}
+          player={player}
+          userPlayer={player.id === myPlayerId}
           joystick={joystick}
           onKilled={onKilled}
           onFire={onFire}
           downgradedPerformance={downgradedPerformance}
+          isHost={isHost}
+          updatePlayerState={updatePlayerState}
         />
       ))}
-      {(isHost() ? bullets : networkBullets).map((bullet) => (
+      {(isHost ? bullets : networkBullets).map((bullet) => (
         <Bullet
           key={bullet.id}
           {...bullet}
           onHit={(position) => onHit(bullet.id, position)}
+          isHost={isHost}
         />
       ))}
-      {(isHost() ? hits : networkHits).map((hit) => (
-        <BulletHit key={hit.id} {...hit} onEnded={() => onHitEnded(hit.id)} />
+      {(isHost ? hits : networkHits).map((hit) => (
+        <BulletHit key={hit.id} {...hit} onEnded={() => onHitEnded(hit.id)} isHost={isHost} />
       ))}
       <Environment preset="sunset" />
     </>
