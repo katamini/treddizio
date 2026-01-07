@@ -28,6 +28,7 @@ export const CharacterController = ({
   const [animation, setAnimation] = useState("Idle");
   const [weapon, setWeapon] = useState("AK");
   const lastShoot = useRef(0);
+  const lastRotationY = useRef(0); // Track rotation for fire direction
 
   const scene = useThree((state) => state.scene);
   const spawnRandomly = () => {
@@ -47,10 +48,19 @@ export const CharacterController = ({
   };
 
   useEffect(() => {
-    if (isHost && userPlayer) {
+    if (isHost && userPlayer && rigidbody.current) {
       spawnRandomly();
+    } else if (!userPlayer && rigidbody.current) {
+      // Remote player: set initial position if available
+      const pos = player.state.pos;
+      if (pos && Array.isArray(pos) && pos.length >= 3) {
+        rigidbody.current.setTranslation({ x: pos[0], y: pos[1], z: pos[2] });
+      } else if (!pos) {
+        // No position yet, spawn at origin
+        rigidbody.current.setTranslation({ x: 0, y: 1, z: 0 });
+      }
     }
-  }, [isHost, userPlayer]);
+  }, [isHost, userPlayer, player.state.pos]);
 
   useEffect(() => {
     if (player.state.dead) {
@@ -104,6 +114,7 @@ export const CharacterController = ({
       setAnimation("Run");
       if (character.current) {
         character.current.rotation.y = angle;
+        lastRotationY.current = angle; // Track rotation for fire direction
       }
 
       // move character in its own direction
@@ -119,11 +130,21 @@ export const CharacterController = ({
     } else {
       setAnimation("Idle");
     }
+    
+    // Update remote player rotation based on movement direction
+    if (!userPlayer && character.current && player.state.pos) {
+      // Calculate rotation from last position if available
+      // For now, keep last known rotation
+    }
 
     // Check if fire button is pressed
     if (userPlayer && joystick.isPressed("fire") && rigidbody.current) {
       // fire
       const currentAngle = joystick.angle();
+      // Use joystick angle if available, otherwise use character rotation (for keyboard)
+      const fireAngle = currentAngle !== null ? currentAngle : 
+                       (character.current ? character.current.rotation.y : lastRotationY.current);
+      
       setAnimation(
         isMoving && currentAngle !== null ? "Run_Shoot" : "Idle_Shoot"
       );
@@ -135,7 +156,7 @@ export const CharacterController = ({
             const newBullet = {
               id: player.id + "-" + +new Date(),
               position: vec3(translation),
-              angle: currentAngle || 0,
+              angle: fireAngle,
               player: player.id,
             };
             onFire(newBullet);
@@ -144,15 +165,31 @@ export const CharacterController = ({
       }
     }
 
+    // Sync position: host sends, non-host receives
     if (isHost && userPlayer && rigidbody.current && rigidbody.current.translation) {
       const translation = rigidbody.current.translation();
       if (translation) {
-        updatePlayerState(player.id, { pos: translation });
+        // Convert Vector3 to array for network sync
+        const posArray = [translation.x, translation.y, translation.z];
+        updatePlayerState(player.id, { 
+          pos: posArray,
+          rotation: character.current ? character.current.rotation.y : 0
+        });
       }
-    } else if (!isHost && !userPlayer && rigidbody.current && rigidbody.current.setTranslation) {
+    } else if (!userPlayer && rigidbody.current && rigidbody.current.setTranslation) {
+      // Remote player: update position from network
       const pos = player.state.pos;
-      if (pos) {
+      if (pos && Array.isArray(pos) && pos.length >= 3) {
+        // Convert array back to Vector3
+        rigidbody.current.setTranslation({ x: pos[0], y: pos[1], z: pos[2] });
+      } else if (pos && typeof pos === 'object' && pos.x !== undefined) {
+        // Already a Vector3-like object
         rigidbody.current.setTranslation(pos);
+      }
+      
+      // Update rotation if available
+      if (player.state.rotation !== undefined && character.current) {
+        character.current.rotation.y = player.state.rotation;
       }
     }
   });
@@ -173,7 +210,7 @@ export const CharacterController = ({
         colliders={false}
         linearDamping={12}
         lockRotations
-        type={isHost && userPlayer ? "dynamic" : "kinematicPosition"}
+        type={userPlayer && isHost ? "dynamic" : "kinematicPosition"}
         onIntersectionEnter={({ other }) => {
           if (
             isHost &&
