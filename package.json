@@ -7,13 +7,13 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "generate:character": "npx gltfjsx@6.2.3 public/models/Character_Soldier.gltf -o src/components/CharacterSoldier.jsx -r public -k",
+    "generate:character": "npx gltfjsx@6.5.3 public/models/Character_Soldier_new.gltf -o src/components/CharacterSoldier.jsx -r public -k",
     "generate:map": "npx gltfjsx@6.2.3 public/models/map.glb -o src/components/Map.jsx -r public -k",
     "generate:all": "npm run generate:character && npm run generate:map"
   },
   "dependencies": {
     "three": "^0.176.0",
-    "trystero": "^0.9.0"
+    "trystero": "^0.22.0"
   },
   "devDependencies": {
     "gltfjsx": "^6.5.3",
