@@ -17,41 +17,39 @@ export const Experience = ({ downgradedPerformance = false }) => {
   // Create joystick for local player
   const joystick = useJoystick();
 
-  // Sync bullets across network
+  // Sync bullets across network (only host sends)
   useEffect(() => {
-    if (actions.sendBullets && bullets.length > 0) {
+    if (actions.sendBullets && isHost && bullets.length > 0) {
       actions.sendBullets(bullets);
     }
-  }, [bullets, actions]);
+  }, [bullets, actions, isHost]);
 
-  // Sync hits across network
+  // Sync hits across network (only host sends)
   useEffect(() => {
-    if (actions.sendHits && hits.length > 0) {
+    if (actions.sendHits && isHost && hits.length > 0) {
       actions.sendHits(hits);
     }
-  }, [hits, actions]);
+  }, [hits, actions, isHost]);
 
   // Listen for network bullets
   useEffect(() => {
     if (actions.getBullets) {
-      const cleanup = actions.getBullets((data) => {
+      actions.getBullets((data) => {
         if (!isHost) {
           setNetworkBullets(data);
         }
       });
-      return cleanup;
     }
   }, [actions, isHost]);
 
   // Listen for network hits
   useEffect(() => {
     if (actions.getHits) {
-      const cleanup = actions.getHits((data) => {
+      actions.getHits((data) => {
         if (!isHost) {
           setNetworkHits(data);
         }
       });
-      return cleanup;
     }
   }, [actions, isHost]);
 
