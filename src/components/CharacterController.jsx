@@ -230,12 +230,27 @@ export const CharacterController = ({
   });
   const controls = useRef();
   const directionalLight = useRef();
+  const respawnTimerRef = useRef(null);
 
   useEffect(() => {
     if (character.current && userPlayer) {
       directionalLight.current.target = character.current;
     }
   }, [character.current, userPlayer]);
+
+  // Cleanup on unmount (when player leaves)
+  useEffect(() => {
+    return () => {
+      // Clear any pending respawn timers
+      if (respawnTimerRef.current) {
+        clearTimeout(respawnTimerRef.current);
+      }
+      // Clean up rigidbody
+      if (rigidbody.current) {
+        rigidbody.current.setEnabled(false);
+      }
+    };
+  }, []);
 
   return (
     <group {...props} ref={group}>
@@ -261,14 +276,24 @@ export const CharacterController = ({
                 dead: true,
                 health: 0
               });
-              rigidbody.current.setEnabled(false);
-              setTimeout(() => {
-                spawnRandomly();
-                rigidbody.current.setEnabled(true);
-                updatePlayerState(player.id, {
-                  health: 100,
-                  dead: false
-                });
+              if (rigidbody.current) {
+                rigidbody.current.setEnabled(false);
+              }
+              // Clear any existing respawn timer
+              if (respawnTimerRef.current) {
+                clearTimeout(respawnTimerRef.current);
+              }
+              // Clean up and respawn after delay
+              respawnTimerRef.current = setTimeout(() => {
+                if (rigidbody.current) {
+                  spawnRandomly();
+                  rigidbody.current.setEnabled(true);
+                  updatePlayerState(player.id, {
+                    health: 100,
+                    dead: false
+                  });
+                }
+                respawnTimerRef.current = null;
               }, 2000);
               onKilled(player.id, other.rigidBody.userData.player);
             } else {
@@ -277,7 +302,7 @@ export const CharacterController = ({
           }
         }}
       >
-        <PlayerInfo state={player.state} />
+        {!player.state.dead && <PlayerInfo state={player.state} />}
         <group ref={character}>
           <CharacterSoldier
             color={player.state.profile?.color}
@@ -316,6 +341,12 @@ export const CharacterController = ({
 const PlayerInfo = ({ state }) => {
   const health = state.health;
   const name = state.profile?.name || "Player";
+  
+  // Don't render health bar if player is dead or health is invalid
+  if (state.dead || health <= 0) {
+    return null;
+  }
+  
   return (
     <Billboard position-y={2.5}>
       <Text position-y={0.36} fontSize={0.4}>
@@ -326,10 +357,12 @@ const PlayerInfo = ({ state }) => {
         <planeGeometry args={[1, 0.2]} />
         <meshBasicMaterial color="black" transparent opacity={0.5} />
       </mesh>
-      <mesh scale-x={health / 100} position-x={-0.5 * (1 - health / 100)}>
-        <planeGeometry args={[1, 0.2]} />
-        <meshBasicMaterial color="red" />
-      </mesh>
+      {health > 0 && (
+        <mesh scale-x={Math.max(0, health / 100)} position-x={-0.5 * (1 - Math.max(0, health / 100))}>
+          <planeGeometry args={[1, 0.2]} />
+          <meshBasicMaterial color="red" />
+        </mesh>
+      )}
     </Billboard>
   );
 };
