@@ -78,8 +78,12 @@ export function useTrysteroRoom() {
       setPlayers(Array.from(playersRef.current.values()));
     });
     
-    // Listen for player state updates
+    // Listen for player state updates from OTHER players only
     getPlayerState((data, peerId) => {
+      // NEVER update our own state from network - we control our own state!
+      if (peerId === localId) {
+        return; // Ignore our own state updates from network
+      }
       const player = playersRef.current.get(peerId);
       if (player) {
         player.state = { ...player.state, ...data.state };
@@ -116,18 +120,20 @@ export function useTrysteroRoom() {
   const updatePlayerState = useCallback((playerId, state) => {
     const player = playersRef.current.get(playerId);
     if (player) {
+      // Update local state
       player.state = { ...player.state, ...state };
       setPlayers(Array.from(playersRef.current.values()));
       
-      // Broadcast to all peers
-      if (actionsRef.current.sendPlayerState) {
+      // Broadcast to all peers (only if it's our own player)
+      // Each player only broadcasts their own state
+      if (playerId === myPlayerId && actionsRef.current.sendPlayerState) {
         actionsRef.current.sendPlayerState({
           id: playerId,
           state: player.state
         });
       }
     }
-  }, []);
+  }, [myPlayerId]);
   
   const getPlayer = useCallback((playerId) => {
     return playersRef.current.get(playerId);

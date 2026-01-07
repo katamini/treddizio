@@ -28,6 +28,8 @@ export const CharacterController = ({
   const [weapon, setWeapon] = useState("AK");
   const lastShoot = useRef(0);
   const lastRotationY = useRef(0); // Track rotation for fire direction
+  const lastPositionUpdate = useRef(0); // Throttle position updates
+  const POSITION_UPDATE_INTERVAL = 100; // Send position every 100ms (10 times per second)
 
   const scene = useThree((state) => state.scene);
   const spawnRandomly = () => {
@@ -48,7 +50,7 @@ export const CharacterController = ({
 
   useEffect(() => {
     if (userPlayer && rigidbody.current) {
-      // Local player: spawn randomly
+      // Local player: spawn randomly (only once on mount)
       spawnRandomly();
     } else if (!userPlayer && rigidbody.current) {
       // Remote player: set initial position if available
@@ -60,7 +62,7 @@ export const CharacterController = ({
         rigidbody.current.setTranslation({ x: 0, y: 1.28, z: 0 });
       }
     }
-  }, [userPlayer, player.state.pos]);
+  }, [userPlayer]); // Only run on mount, not when position changes
 
   useEffect(() => {
     if (player.state.dead) {
@@ -167,27 +169,57 @@ export const CharacterController = ({
       }
     }
 
-    // Sync position: local player sends, remote players receive
+    // Sync position: local player sends (throttled), remote players receive
+    const now = Date.now();
     if (userPlayer && rigidbody.current && rigidbody.current.translation) {
-      // Local player: send position to network
-      const translation = rigidbody.current.translation();
-      if (translation) {
-        // Convert Vector3 to array for network sync
-        const posArray = [translation.x, translation.y, translation.z];
-        updatePlayerState(player.id, { 
-          pos: posArray,
-          rotation: character.current ? character.current.rotation.y : lastRotationY.current
-        });
+      // Local player: send position to network (throttled to avoid spam)
+      if (now - lastPositionUpdate.current > POSITION_UPDATE_INTERVAL) {
+        lastPositionUpdate.current = now;
+        const translation = rigidbody.current.translation();
+        if (translation) {
+          // Convert Vector3 to array for network sync
+          const posArray = [translation.x, translation.y, translation.z];
+          updatePlayerState(player.id, { 
+            pos: posArray,
+            rotation: character.current ? character.current.rotation.y : lastRotationY.current
+          });
+        }
       }
     } else if (!userPlayer && rigidbody.current && rigidbody.current.setTranslation) {
-      // Remote player: update position from network
+      // Remote player ONLY: update position from network
+      // NEVER apply network position to local player!
       const pos = player.state.pos;
       if (pos && Array.isArray(pos) && pos.length >= 3) {
-        // Convert array back to Vector3
-        rigidbody.current.setTranslation({ x: pos[0], y: pos[1], z: pos[2] });
+        // Smooth interpolation for remote players
+        const currentPos = rigidbody.current.translation();
+        if (currentPos) {
+          const targetPos = { x: pos[0], y: pos[1], z: pos[2] };
+          // Interpolate for smooth movement
+          const lerpFactor = Math.min(1, delta * 10); // Smooth interpolation
+          const newPos = {
+            x: currentPos.x + (targetPos.x - currentPos.x) * lerpFactor,
+            y: currentPos.y + (targetPos.y - currentPos.y) * lerpFactor,
+            z: currentPos.z + (targetPos.z - currentPos.z) * lerpFactor
+          };
+          rigidbody.current.setTranslation(newPos);
+        } else {
+          // First time, set directly
+          rigidbody.current.setTranslation({ x: pos[0], y: pos[1], z: pos[2] });
+        }
       } else if (pos && typeof pos === 'object' && pos.x !== undefined) {
         // Already a Vector3-like object
-        rigidbody.current.setTranslation(pos);
+        const currentPos = rigidbody.current.translation();
+        if (currentPos) {
+          const lerpFactor = Math.min(1, delta * 10);
+          const newPos = {
+            x: currentPos.x + (pos.x - currentPos.x) * lerpFactor,
+            y: currentPos.y + (pos.y - currentPos.y) * lerpFactor,
+            z: currentPos.z + (pos.z - currentPos.z) * lerpFactor
+          };
+          rigidbody.current.setTranslation(newPos);
+        } else {
+          rigidbody.current.setTranslation(pos);
+        }
       }
       
       // Update rotation if available
