@@ -6,9 +6,9 @@ import { CharacterSoldier } from "./CharacterSoldier";
 const MOVEMENT_SPEED = 202;
 const FIRE_RATE = 380;
 export const WEAPON_OFFSET = {
-  x: -0.2,
-  y: 1.4,
-  z: 0.8,
+  x: -0.02,
+  y: 0.14,
+  z: 0.08,
 };
 
 export const CharacterController = ({
@@ -332,7 +332,7 @@ export const CharacterController = ({
             shadow-bias={-0.0001}
           />
         )}
-        <CapsuleCollider args={[0.7, 0.6]} position={[0, 1.28, 0]} />
+        <CapsuleCollider args={[0.07, 0.06]} position={[0, 0.128, 0]} />
       </RigidBody>
     </group>
   );
@@ -348,7 +348,7 @@ const PlayerInfo = ({ state }) => {
   }
   
   return (
-    <Billboard position-y={2.5}>
+    <Billboard position-y={0.25}>
       <Text position-y={0.36} fontSize={0.4}>
         {name}
         <meshBasicMaterial color={state.profile?.color || "#ffffff"} />

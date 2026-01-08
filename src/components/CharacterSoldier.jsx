@@ -99,7 +99,7 @@ export function CharacterSoldier({
   }, [nodes, clone, weapon, playerColorMaterial]);
 
   return (
-    <group {...props} dispose={null} ref={group}>
+    <group {...props} dispose={null} ref={group} scale={0.1}>
       <group name="Root" position={[-0.022, -0.04, -0.002]}>
         <group name="Body_1" position={[0.036, 12.175, 1.079]}>
           <group name="Hips" position={[-0.025, -5.626, -1.528]} rotation={[-0.102, 0, 0]}>
