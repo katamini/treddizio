@@ -108,15 +108,20 @@ export function CharacterSoldier({
                 <group name="Neck" position={[0, 6.011, 0]} rotation={[-0.088, 0, 0]}>
                   <group name="Head" position={[0, 1.904, 0]} rotation={[-0.17, -0.001, 0]}>
                     <group name="Head_1" position={[0.011, -26.205, 0.052]} rotation={[0, 0.001, 0]} scale={0.586}>
+                      {nodes['Head-Grey'] && <mesh name="Head-Grey" geometry={nodes['Head-Grey']?.geometry} material={materials.Grey} />}
                       <mesh name="Head-Grey" geometry={nodes['Head-Grey'].geometry} material={materials.Grey} />
+                      {nodes['Head-Character_Main'] && <mesh name="Head-Character_Main" geometry={nodes['Head-Character_Main']?.geometry} material={materials.Character_Main} />}
                       <mesh name="Head-Character_Main" geometry={nodes['Head-Character_Main'].geometry} material={materials.Character_Main} />
+                      {nodes['Head-Black'] && <mesh name="Head-Black" geometry={nodes['Head-Black']?.geometry} material={materials.Black} />}
                       <mesh name="Head-Black" geometry={nodes['Head-Black'].geometry} material={materials.Black} />
                     </group>
+                    {nodes.Default_4 && <mesh name="Default_4" geometry={nodes.Default_4?.geometry} material={materials.Default} position={[-2.698, 5.226, -2.405]} rotation={[1.588, 0, -3.012]} />}
                     <mesh name="Default_4" geometry={nodes.Default_4.geometry} material={materials.Default} position={[-2.698, 5.226, -2.405]} rotation={[1.588, 0, -3.012]} />
                   </group>
                 </group>
                 <group name="ShoulderL" position={[1.481, 3.028, 0.105]} rotation={[-0.105, 0.048, -0.513]}>
                   <group name="UpperArmL" position={[0, 2.338, 0]} rotation={[-1.649, 0.332, -1.492]}>
+                    {nodes.ShoulderPadL && <mesh name="ShoulderPadL" geometry={nodes.ShoulderPadL?.geometry} material={materials.Grey} position={[-0.099, 3.704, 1.491]} rotation={[2.387, 1.485, -0.818]} scale={0.586} />}
                     <mesh name="ShoulderPadL" geometry={nodes.ShoulderPadL.geometry} material={materials.Grey} position={[-0.099, 3.704, 1.491]} rotation={[2.387, 1.485, -0.818]} scale={0.586} />
                   </group>
                 </group>
@@ -125,85 +130,136 @@ export function CharacterSoldier({
                     <group name="LowerArmR" position={[0, 6.464, 0]} rotation={[0.264, -0.365, 1.461]}>
                       <group name="Index1R" position={[0, 7.335, 0]} rotation={[0.062, 0.054, 0.417]}>
                         <group name="AK" position={[0.172, 2.525, -0.902]} rotation={[0.046, 0.197, 1.109]} scale={0.418}>
+                          {nodes['AK-Grey'] && <mesh name="AK-Grey" geometry={nodes['AK-Grey']?.geometry} material={materials.Grey} />}
                           <mesh name="AK-Grey" geometry={nodes['AK-Grey'].geometry} material={materials.Grey} />
+                          {nodes['AK-Grey2'] && <mesh name="AK-Grey2" geometry={nodes['AK-Grey2']?.geometry} material={materials.Grey2} />}
                           <mesh name="AK-Grey2" geometry={nodes['AK-Grey2'].geometry} material={materials.Grey2} />
+                          {nodes['AK-Wood'] && <mesh name="AK-Wood" geometry={nodes['AK-Wood']?.geometry} material={materials.Wood} />}
                           <mesh name="AK-Wood" geometry={nodes['AK-Wood'].geometry} material={materials.Wood} />
+                          {nodes['AK-DarkGrey'] && <mesh name="AK-DarkGrey" geometry={nodes['AK-DarkGrey']?.geometry} material={materials.DarkGrey} />}
                           <mesh name="AK-DarkGrey" geometry={nodes['AK-DarkGrey'].geometry} material={materials.DarkGrey} />
                         </group>
                         <group name="GrenadeLauncher" position={[0.09, 9.035, -1.021]} rotation={[-1.352, -1.153, -2.893]}>
+                          {nodes['GrenadeLauncher-Grey'] && <mesh name="GrenadeLauncher-Grey" geometry={nodes['GrenadeLauncher-Grey']?.geometry} material={materials.Grey} />}
                           <mesh name="GrenadeLauncher-Grey" geometry={nodes['GrenadeLauncher-Grey'].geometry} material={materials.Grey} />
+                          {nodes['GrenadeLauncher-DarkGrey'] && <mesh name="GrenadeLauncher-DarkGrey" geometry={nodes['GrenadeLauncher-DarkGrey']?.geometry} material={materials.DarkGrey} />}
                           <mesh name="GrenadeLauncher-DarkGrey" geometry={nodes['GrenadeLauncher-DarkGrey'].geometry} material={materials.DarkGrey} />
+                          {nodes['GrenadeLauncher-Wood'] && <mesh name="GrenadeLauncher-Wood" geometry={nodes['GrenadeLauncher-Wood']?.geometry} material={materials.Wood} />}
                           <mesh name="GrenadeLauncher-Wood" geometry={nodes['GrenadeLauncher-Wood'].geometry} material={materials.Wood} />
+                          {nodes['GrenadeLauncher-Grey2'] && <mesh name="GrenadeLauncher-Grey2" geometry={nodes['GrenadeLauncher-Grey2']?.geometry} material={materials.Grey2} />}
                           <mesh name="GrenadeLauncher-Grey2" geometry={nodes['GrenadeLauncher-Grey2'].geometry} material={materials.Grey2} />
                         </group>
                         <group name="Knife_1" position={[1.145, 2.344, -0.908]} rotation={[3.1, -0.018, 2.098]} scale={0.183}>
+                          {nodes['Knife_1-Grey'] && <mesh name="Knife_1-Grey" geometry={nodes['Knife_1-Grey']?.geometry} material={materials.Grey} />}
                           <mesh name="Knife_1-Grey" geometry={nodes['Knife_1-Grey'].geometry} material={materials.Grey} />
+                          {nodes['Knife_1-LightGrey'] && <mesh name="Knife_1-LightGrey" geometry={nodes['Knife_1-LightGrey']?.geometry} material={materials.LightGrey} />}
                           <mesh name="Knife_1-LightGrey" geometry={nodes['Knife_1-LightGrey'].geometry} material={materials.LightGrey} />
+                          {nodes['Knife_1-DarkWood'] && <mesh name="Knife_1-DarkWood" geometry={nodes['Knife_1-DarkWood']?.geometry} material={materials.DarkWood} />}
                           <mesh name="Knife_1-DarkWood" geometry={nodes['Knife_1-DarkWood'].geometry} material={materials.DarkWood} />
+                          {nodes['Knife_1-Wood'] && <mesh name="Knife_1-Wood" geometry={nodes['Knife_1-Wood']?.geometry} material={materials.Wood} />}
                           <mesh name="Knife_1-Wood" geometry={nodes['Knife_1-Wood'].geometry} material={materials.Wood} />
                         </group>
                         <group name="Knife_2" position={[0.77, 2.535, -0.776]} rotation={[3.084, 0.014, 2.024]} scale={0.175}>
+                          {nodes['Knife_2-DarkGrey'] && <mesh name="Knife_2-DarkGrey" geometry={nodes['Knife_2-DarkGrey']?.geometry} material={materials.DarkGrey} />}
                           <mesh name="Knife_2-DarkGrey" geometry={nodes['Knife_2-DarkGrey'].geometry} material={materials.DarkGrey} />
+                          {nodes['Knife_2-Black'] && <mesh name="Knife_2-Black" geometry={nodes['Knife_2-Black']?.geometry} material={materials.Black} />}
                           <mesh name="Knife_2-Black" geometry={nodes['Knife_2-Black'].geometry} material={materials.Black} />
+                          {nodes['Knife_2-LightGrey'] && <mesh name="Knife_2-LightGrey" geometry={nodes['Knife_2-LightGrey']?.geometry} material={materials.LightGrey} />}
                           <mesh name="Knife_2-LightGrey" geometry={nodes['Knife_2-LightGrey'].geometry} material={materials.LightGrey} />
                         </group>
                         <group name="Pistol" position={[0.029, 2.282, -0.94]} rotation={[0.053, 0.212, 1.039]} scale={0.108}>
+                          {nodes['Pistol-Grey'] && <mesh name="Pistol-Grey" geometry={nodes['Pistol-Grey']?.geometry} material={materials.Grey} />}
                           <mesh name="Pistol-Grey" geometry={nodes['Pistol-Grey'].geometry} material={materials.Grey} />
+                          {nodes['Pistol-DarkGrey'] && <mesh name="Pistol-DarkGrey" geometry={nodes['Pistol-DarkGrey']?.geometry} material={materials.DarkGrey} />}
                           <mesh name="Pistol-DarkGrey" geometry={nodes['Pistol-DarkGrey'].geometry} material={materials.DarkGrey} />
+                          {nodes['Pistol-Wood'] && <mesh name="Pistol-Wood" geometry={nodes['Pistol-Wood']?.geometry} material={materials.Wood} />}
                           <mesh name="Pistol-Wood" geometry={nodes['Pistol-Wood'].geometry} material={materials.Wood} />
                         </group>
                         <group name="Revolver" position={[-0.616, 2.265, -0.747]} rotation={[0.034, 0.229, 0.965]} scale={[0.11, 0.11, 0.119]}>
+                          {nodes['Revolver-Grey2'] && <mesh name="Revolver-Grey2" geometry={nodes['Revolver-Grey2']?.geometry} material={materials.Grey2} />}
                           <mesh name="Revolver-Grey2" geometry={nodes['Revolver-Grey2'].geometry} material={materials.Grey2} />
+                          {nodes['Revolver-Grey'] && <mesh name="Revolver-Grey" geometry={nodes['Revolver-Grey']?.geometry} material={materials.Grey} />}
                           <mesh name="Revolver-Grey" geometry={nodes['Revolver-Grey'].geometry} material={materials.Grey} />
+                          {nodes['Revolver-DarkGrey'] && <mesh name="Revolver-DarkGrey" geometry={nodes['Revolver-DarkGrey']?.geometry} material={materials.DarkGrey} />}
                           <mesh name="Revolver-DarkGrey" geometry={nodes['Revolver-DarkGrey'].geometry} material={materials.DarkGrey} />
+                          {nodes['Revolver-Wood'] && <mesh name="Revolver-Wood" geometry={nodes['Revolver-Wood']?.geometry} material={materials.Wood} />}
                           <mesh name="Revolver-Wood" geometry={nodes['Revolver-Wood'].geometry} material={materials.Wood} />
                         </group>
                         <group name="Revolver_Small" position={[-0.284, 2.39, -0.944]} rotation={[0.039, 0.164, 0.915]} scale={[0.101, 0.101, 0.11]}>
+                          {nodes['Revolver_Small-Grey2'] && <mesh name="Revolver_Small-Grey2" geometry={nodes['Revolver_Small-Grey2']?.geometry} material={materials.Grey2} />}
                           <mesh name="Revolver_Small-Grey2" geometry={nodes['Revolver_Small-Grey2'].geometry} material={materials.Grey2} />
+                          {nodes['Revolver_Small-Grey'] && <mesh name="Revolver_Small-Grey" geometry={nodes['Revolver_Small-Grey']?.geometry} material={materials.Grey} />}
                           <mesh name="Revolver_Small-Grey" geometry={nodes['Revolver_Small-Grey'].geometry} material={materials.Grey} />
+                          {nodes['Revolver_Small-DarkGrey'] && <mesh name="Revolver_Small-DarkGrey" geometry={nodes['Revolver_Small-DarkGrey']?.geometry} material={materials.DarkGrey} />}
                           <mesh name="Revolver_Small-DarkGrey" geometry={nodes['Revolver_Small-DarkGrey'].geometry} material={materials.DarkGrey} />
+                          {nodes['Revolver_Small-Wood'] && <mesh name="Revolver_Small-Wood" geometry={nodes['Revolver_Small-Wood']?.geometry} material={materials.Wood} />}
                           <mesh name="Revolver_Small-Wood" geometry={nodes['Revolver_Small-Wood'].geometry} material={materials.Wood} />
                         </group>
                         <group name="RocketLauncher" position={[0.349, 2.568, -1.131]} rotation={[0.042, 0.188, 1.109]} scale={0.207}>
+                          {nodes['RocketLauncher-Black'] && <mesh name="RocketLauncher-Black" geometry={nodes['RocketLauncher-Black']?.geometry} material={materials.Black} />}
                           <mesh name="RocketLauncher-Black" geometry={nodes['RocketLauncher-Black'].geometry} material={materials.Black} />
+                          {nodes['RocketLauncher-Grey'] && <mesh name="RocketLauncher-Grey" geometry={nodes['RocketLauncher-Grey']?.geometry} material={materials.Grey} />}
                           <mesh name="RocketLauncher-Grey" geometry={nodes['RocketLauncher-Grey'].geometry} material={materials.Grey} />
+                          {nodes['RocketLauncher-DarkGrey'] && <mesh name="RocketLauncher-DarkGrey" geometry={nodes['RocketLauncher-DarkGrey']?.geometry} material={materials.DarkGrey} />}
                           <mesh name="RocketLauncher-DarkGrey" geometry={nodes['RocketLauncher-DarkGrey'].geometry} material={materials.DarkGrey} />
+                          {nodes['RocketLauncher-Red'] && <mesh name="RocketLauncher-Red" geometry={nodes['RocketLauncher-Red']?.geometry} material={materials.Red} />}
                           <mesh name="RocketLauncher-Red" geometry={nodes['RocketLauncher-Red'].geometry} material={materials.Red} />
                         </group>
                         <group name="ShortCannon" position={[-0.291, 3.402, -0.939]} rotation={[0.042, 0.127, 1.53]} scale={0.238}>
+                          {nodes['ShortCannon-Grey'] && <mesh name="ShortCannon-Grey" geometry={nodes['ShortCannon-Grey']?.geometry} material={materials.Grey} />}
                           <mesh name="ShortCannon-Grey" geometry={nodes['ShortCannon-Grey'].geometry} material={materials.Grey} />
+                          {nodes['ShortCannon-DarkGrey'] && <mesh name="ShortCannon-DarkGrey" geometry={nodes['ShortCannon-DarkGrey']?.geometry} material={materials.DarkGrey} />}
                           <mesh name="ShortCannon-DarkGrey" geometry={nodes['ShortCannon-DarkGrey'].geometry} material={materials.DarkGrey} />
+                          {nodes['ShortCannon-Wood'] && <mesh name="ShortCannon-Wood" geometry={nodes['ShortCannon-Wood']?.geometry} material={materials.Wood} />}
                           <mesh name="ShortCannon-Wood" geometry={nodes['ShortCannon-Wood'].geometry} material={materials.Wood} />
                         </group>
                         <group name="Shotgun" position={[-0.659, 3.287, -1.173]} rotation={[-0.466, -1.436, -2.056]}>
+                          {nodes['Shotgun-Grey2'] && <mesh name="Shotgun-Grey2" geometry={nodes['Shotgun-Grey2']?.geometry} material={materials.Grey2} />}
                           <mesh name="Shotgun-Grey2" geometry={nodes['Shotgun-Grey2'].geometry} material={materials.Grey2} />
+                          {nodes['Shotgun-Grey'] && <mesh name="Shotgun-Grey" geometry={nodes['Shotgun-Grey']?.geometry} material={materials.Grey} />}
                           <mesh name="Shotgun-Grey" geometry={nodes['Shotgun-Grey'].geometry} material={materials.Grey} />
+                          {nodes['Shotgun-DarkGrey'] && <mesh name="Shotgun-DarkGrey" geometry={nodes['Shotgun-DarkGrey']?.geometry} material={materials.DarkGrey} />}
                           <mesh name="Shotgun-DarkGrey" geometry={nodes['Shotgun-DarkGrey'].geometry} material={materials.DarkGrey} />
+                          {nodes['Shotgun-Wood'] && <mesh name="Shotgun-Wood" geometry={nodes['Shotgun-Wood']?.geometry} material={materials.Wood} />}
                           <mesh name="Shotgun-Wood" geometry={nodes['Shotgun-Wood'].geometry} material={materials.Wood} />
                         </group>
                         <group name="Shovel" position={[-0.071, 2.928, -1.043]} rotation={[3.091, -0.001, -1.12]} scale={[0.743, 0.803, 0.803]}>
+                          {nodes['Shovel-DarkWood'] && <mesh name="Shovel-DarkWood" geometry={nodes['Shovel-DarkWood']?.geometry} material={materials.DarkWood} />}
                           <mesh name="Shovel-DarkWood" geometry={nodes['Shovel-DarkWood'].geometry} material={materials.DarkWood} />
+                          {nodes['Shovel-Grey'] && <mesh name="Shovel-Grey" geometry={nodes['Shovel-Grey']?.geometry} material={materials.Grey} />}
                           <mesh name="Shovel-Grey" geometry={nodes['Shovel-Grey'].geometry} material={materials.Grey} />
+                          {nodes['Shovel-Red'] && <mesh name="Shovel-Red" geometry={nodes['Shovel-Red']?.geometry} material={materials.Red} />}
                           <mesh name="Shovel-Red" geometry={nodes['Shovel-Red'].geometry} material={materials.Red} />
                         </group>
                         <group name="SMG" position={[-0.145, 2.432, -1.04]} rotation={[-1.346, -1.096, -2.895]}>
+                          {nodes['SMG-Grey'] && <mesh name="SMG-Grey" geometry={nodes['SMG-Grey']?.geometry} material={materials.Grey} />}
                           <mesh name="SMG-Grey" geometry={nodes['SMG-Grey'].geometry} material={materials.Grey} />
+                          {nodes['SMG-DarkGrey'] && <mesh name="SMG-DarkGrey" geometry={nodes['SMG-DarkGrey']?.geometry} material={materials.DarkGrey} />}
                           <mesh name="SMG-DarkGrey" geometry={nodes['SMG-DarkGrey'].geometry} material={materials.DarkGrey} />
+                          {nodes['SMG-Grey2'] && <mesh name="SMG-Grey2" geometry={nodes['SMG-Grey2']?.geometry} material={materials.Grey2} />}
                           <mesh name="SMG-Grey2" geometry={nodes['SMG-Grey2'].geometry} material={materials.Grey2} />
+                          {nodes['SMG-Black'] && <mesh name="SMG-Black" geometry={nodes['SMG-Black']?.geometry} material={materials.Black} />}
                           <mesh name="SMG-Black" geometry={nodes['SMG-Black'].geometry} material={materials.Black} />
                         </group>
                         <group name="Sniper" position={[0.099, 2.706, -0.866]} rotation={[0.01, 0.098, 1.262]} scale={0.214}>
+                          {nodes['Sniper-DarkGrey'] && <mesh name="Sniper-DarkGrey" geometry={nodes['Sniper-DarkGrey']?.geometry} material={materials.DarkGrey} />}
                           <mesh name="Sniper-DarkGrey" geometry={nodes['Sniper-DarkGrey'].geometry} material={materials.DarkGrey} />
+                          {nodes['Sniper-Grey'] && <mesh name="Sniper-Grey" geometry={nodes['Sniper-Grey']?.geometry} material={materials.Grey} />}
                           <mesh name="Sniper-Grey" geometry={nodes['Sniper-Grey'].geometry} material={materials.Grey} />
+                          {nodes['Sniper-Black'] && <mesh name="Sniper-Black" geometry={nodes['Sniper-Black']?.geometry} material={materials.Black} />}
                           <mesh name="Sniper-Black" geometry={nodes['Sniper-Black'].geometry} material={materials.Black} />
                         </group>
                         <group name="Sniper_2" position={[-0.564, 3.065, -0.504]} rotation={[-1.135, -1.067, -2.708]} scale={0.917}>
+                          {nodes['Sniper_2-Grey'] && <mesh name="Sniper_2-Grey" geometry={nodes['Sniper_2-Grey']?.geometry} material={materials.Grey} />}
                           <mesh name="Sniper_2-Grey" geometry={nodes['Sniper_2-Grey'].geometry} material={materials.Grey} />
+                          {nodes['Sniper_2-DarkGrey'] && <mesh name="Sniper_2-DarkGrey" geometry={nodes['Sniper_2-DarkGrey']?.geometry} material={materials.DarkGrey} />}
                           <mesh name="Sniper_2-DarkGrey" geometry={nodes['Sniper_2-DarkGrey'].geometry} material={materials.DarkGrey} />
+                          {nodes['Sniper_2-Wood'] && <mesh name="Sniper_2-Wood" geometry={nodes['Sniper_2-Wood']?.geometry} material={materials.Wood} />}
                           <mesh name="Sniper_2-Wood" geometry={nodes['Sniper_2-Wood'].geometry} material={materials.Wood} />
                         </group>
                       </group>
                     </group>
+                    {nodes.ShoulderPadR && <mesh name="ShoulderPadR" geometry={nodes.ShoulderPadR?.geometry} material={materials.Grey} position={[0.099, 3.704, 1.491]} rotation={[2.387, -1.485, 0.818]} scale={0.586} />}
                     <mesh name="ShoulderPadR" geometry={nodes.ShoulderPadR.geometry} material={materials.Grey} position={[0.099, 3.704, 1.491]} rotation={[2.387, -1.485, 0.818]} scale={0.586} />
                   </group>
                 </group>
@@ -212,20 +268,27 @@ export function CharacterSoldier({
           </group>
           <group name="UpperLegL" position={[2.95, 1.207, -1.689]} rotation={[2.505, 0.011, -0.021]}>
             <group name="LowerLegL" position={[0, 5.647, 0]} rotation={[1.018, 0.021, 0.015]}>
+              {nodes.Default && <mesh name="Default" geometry={nodes.Default?.geometry} material={materials.Default} position={[-0.098, 7.437, 0.181]} rotation={[-1.953, -0.002, -2.978]} />}
               <mesh name="Default" geometry={nodes.Default.geometry} material={materials.Default} position={[-0.098, 7.437, 0.181]} rotation={[-1.953, -0.002, -2.978]} />
             </group>
           </group>
           <group name="UpperLegR" position={[-2.978, 1.207, -1.689]} rotation={[2.505, -0.011, 0.021]}>
             <group name="LowerLegR" position={[0, 5.647, 0]} rotation={[1.018, -0.021, -0.015]}>
+              {nodes.Default_1 && <mesh name="Default_1" geometry={nodes.Default_1?.geometry} material={materials.Default} position={[-0.324, 7.655, 0.72]} rotation={[-1.953, 0.002, -2.957]} />}
               <mesh name="Default_1" geometry={nodes.Default_1.geometry} material={materials.Default} position={[-0.324, 7.655, 0.72]} rotation={[-1.953, 0.002, -2.957]} />
             </group>
           </group>
         </group>
       </group>
+      {nodes['Body-Skin'] && <mesh name="Body-Skin" geometry={nodes['Body-Skin']?.geometry} material={materials.Skin} />}
       <mesh name="Body-Skin" geometry={nodes['Body-Skin'].geometry} material={materials.Skin} />
+      {nodes['Body-DarkGrey'] && <mesh name="Body-DarkGrey" geometry={nodes['Body-DarkGrey']?.geometry} material={materials.DarkGrey} />}
       <mesh name="Body-DarkGrey" geometry={nodes['Body-DarkGrey'].geometry} material={materials.DarkGrey} />
+      {nodes['Body-Pants'] && <mesh name="Body-Pants" geometry={nodes['Body-Pants']?.geometry} material={materials.Pants} />}
       <mesh name="Body-Pants" geometry={nodes['Body-Pants'].geometry} material={materials.Pants} />
+      {nodes['Body-Character_Main'] && <mesh name="Body-Character_Main" geometry={nodes['Body-Character_Main']?.geometry} material={materials.Character_Main} />}
       <mesh name="Body-Character_Main" geometry={nodes['Body-Character_Main'].geometry} material={materials.Character_Main} />
+      {nodes['Body-Black'] && <mesh name="Body-Black" geometry={nodes['Body-Black']?.geometry} material={materials.Black} />}
       <mesh name="Body-Black" geometry={nodes['Body-Black'].geometry} material={materials.Black} />
     </group>
   )
