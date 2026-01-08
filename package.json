@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "generate:character": "npx gltfjsx@6.5.3 public/models/Character_Soldier_new.gltf -o src/components/CharacterSoldier.jsx -r public -k",
     "generate:map": "echo 'Map component uses simple useGLTF approach - no regeneration needed'",
-    "generate:all": "npm run generate:character && npm run generate:map"
+    "generate:all": "npm run generate:character"
   },
   "dependencies": {
     "three": "^0.176.0",
